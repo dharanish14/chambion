@@ -1,11 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, MessageCircle, MapPin, Loader2, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Contact = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pre-warm Render server when page loads (avoids cold start delay)
+  useEffect(() => {
+    fetch(`${API_URL}/api/health`).catch(() => {});
+  }, []);
+
+  const fetchWithTimeout = (url, options, timeout = 40000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    return fetch(url, { ...options, signal: controller.signal })
+      .finally(() => clearTimeout(timer));
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,17 +28,17 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+    const warmingToast = toast.loading('Sending your message...');
+
     try {
-      // Assuming backend runs on 5000 in dev
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/contact`, {
+      const response = await fetchWithTimeout(`${API_URL}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
+      toast.dismiss(warmingToast);
 
       if (response.ok) {
         toast.success(data.message || 'Message sent successfully!');
@@ -33,8 +47,13 @@ const Contact = () => {
         toast.error(data.error || 'Failed to send message.');
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Network error. Please try again later.');
+      toast.dismiss(warmingToast);
+      if (error.name === 'AbortError') {
+        toast.error('Server is warming up — please try again in 30 seconds.');
+      } else {
+        toast.error('Network error. Please try again.');
+      }
+      console.error('Submit error:', error);
     } finally {
       setIsSubmitting(false);
     }
