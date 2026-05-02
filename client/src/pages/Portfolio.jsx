@@ -7,48 +7,8 @@ import CTASection from '../components/CTASection';
 const Portfolio = () => {
   const [selectedProject, setSelectedProject] = useState(null);
 
-  const projects = [
-    {
-      id: 1,
-      title: "FinTech Analytics Dashboard",
-      category: "Web Development",
-      description: "A high-performance React dashboard for a financial firm, processing thousands of data points in real-time.",
-      problem: "The client was using a legacy jQuery dashboard that took over 10 seconds to render large datasets, causing severe workflow bottlenecks.",
-      solution: "We rebuilt the platform using React, Vite, and specialized charting libraries. We implemented virtualized lists and web workers for data processing.",
-      result: "Load times reduced to under 1 second. System handles 10x more data with zero lag.",
-      techStack: ["React", "Vite", "Tailwind CSS", "Recharts", "Web Workers"]
-    },
-    {
-      id: 2,
-      title: "GovPortal A11y Remediation",
-      category: "Accessibility Audit",
-      description: "Complete WCAG 2.1 AA audit and remediation for a local government portal.",
-      problem: "The portal failed automated accessibility scans and was unusable by visually impaired citizens using screen readers.",
-      solution: "Conducted a manual audit, created a 50-page remediation report, and updated the frontend components to be fully keyboard navigable and screen reader compatible.",
-      result: "Achieved 100% compliance score. Zero critical a11y issues remaining.",
-      techStack: ["Axe DevTools", "NVDA", "VoiceOver", "HTML5", "ARIA"]
-    },
-    {
-      id: 3,
-      title: "E-Commerce Competitor Tracker",
-      category: "Web Scraping",
-      description: "Automated pipeline tracking daily price changes across 5 major competitors.",
-      problem: "The client was manually checking competitor prices daily, a process that was slow, error-prone, and unscalable.",
-      solution: "Built a distributed scraping cluster using Puppeteer and Node.js that runs daily, circumvents bot protections, and outputs standardized data.",
-      result: "Saved the client 30 hours per week and increased pricing agility by 400%.",
-      techStack: ["Node.js", "Puppeteer", "MongoDB", "Express", "Cron"]
-    },
-    {
-      id: 4,
-      title: "HealthTech Patient Portal",
-      category: "Web Development",
-      description: "Secure, HIPAA-compliant patient portal built with React and Node.js.",
-      problem: "Patients lacked a unified interface to view test results, book appointments, and message doctors securely.",
-      solution: "Developed a secure React single-page application with robust authentication, end-to-end encryption for messaging, and an intuitive UI.",
-      result: "Patient engagement increased by 65% in the first 3 months post-launch.",
-      techStack: ["React", "Tailwind CSS", "Node.js", "PostgreSQL", "Socket.io"]
-    }
-  ];
+  const projects = [];
+
 
   return (
     <div className="w-full pt-10">
@@ -65,17 +25,34 @@ const Portfolio = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <ProjectCard 
-              key={project.id}
-              title={project.title}
-              category={project.category}
-              delay={index * 0.1}
-              onClick={() => setSelectedProject(project)}
-            />
-          ))}
-        </div>
+        {projects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {projects.map((project, index) => (
+              <ProjectCard 
+                key={project.id}
+                title={project.title}
+                category={project.category}
+                delay={index * 0.1}
+                onClick={() => setSelectedProject(project)}
+              />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="glass border border-white/5 rounded-3xl p-16 text-center"
+          >
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🚀</span>
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">Projects Coming Soon</h3>
+            <p className="text-textMuted text-lg max-w-md mx-auto">
+              We're currently working on exciting projects. Check back soon or reach out to discuss your project with us.
+            </p>
+          </motion.div>
+        )}
       </section>
 
       {/* Case Study Modal */}

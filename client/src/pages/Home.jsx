@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Code, ShieldCheck, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ServiceCard from '../components/ServiceCard';
-import TestimonialCard from '../components/TestimonialCard';
 import CTASection from '../components/CTASection';
 
 const Home = () => {
@@ -142,38 +141,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 bg-[#050505] border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Client <span className="text-secondary">Success</span></h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <TestimonialCard 
-              quote="Chambion completely transformed our web platform. The performance gains were immediate, and their accessibility audit saved us from potential legal issues."
-              author="Sarah Jenkins"
-              role="CTO"
-              company="TechFlow Inc."
-              delay={0.1}
-            />
-            <TestimonialCard 
-              quote="Their web scraping solution automated a process that used to take our team 20 hours a week. Incredibly robust and reliable system."
-              author="Marcus Chen"
-              role="Head of Data"
-              company="MarketInsights"
-              delay={0.2}
-            />
-            <TestimonialCard 
-              quote="The most professional development team we've worked with. They delivered our MVP ahead of schedule with flawless execution."
-              author="Elena Rodriguez"
-              role="Founder"
-              company="Nexus Startup"
-              delay={0.3}
-            />
-          </div>
-        </div>
-      </section>
+
 
       <CTASection />
     </div>
