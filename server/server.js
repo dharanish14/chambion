@@ -1,4 +1,3 @@
-// Trigger restart to load new .env variables
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -9,52 +8,41 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-const allowedOrigins = [
-  'http://localhost:5173',
-  process.env.CLIENT_URL, // e.g. https://chambion.vercel.app
-].filter(Boolean);
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-}));
+// Open CORS - allow all origins
+app.use(cors());
 app.use(express.json());
-
-
 
 // Routes
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, message } = req.body;
-    
-    // Basic validation
+
     if (!name || !email || !message) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
 
+    console.log(`New contact from: ${name} <${email}>`);
 
+    const smtpPort = parseInt(process.env.SMTP_PORT) || 587;
+    const isSecure = smtpPort === 465;
 
-    // Configure Nodemailer transporter
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: process.env.SMTP_PORT || 587,
-      secure: false, // true for 465, false for other ports
+      port: smtpPort,
+      secure: isSecure,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
 
-    // Email content
     const mailOptions = {
-      from: `"Chambion Website" <${process.env.SMTP_USER || 'no-reply@chambion.online.com'}>`,
-      to: process.env.SMTP_USER, // Sending the email to your address
+      from: `"Chambion Website" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_USER,
+      replyTo: email,
       subject: `New Contact Request from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
       html: `<h3>New Contact Request</h3>
@@ -63,27 +51,30 @@ app.post('/api/contact', async (req, res) => {
              <p><strong>Message:</strong><br/>${message}</p>`,
     };
 
-    // Send email if SMTP credentials are provided
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully');
+      console.log('✅ Email sent successfully');
     } else {
-      console.warn('SMTP credentials not configured in .env file. Email was not sent.');
+      console.warn('⚠️ SMTP credentials not set. Email skipped.');
     }
 
     res.status(201).json({ success: true, message: 'Message received successfully!' });
   } catch (error) {
-    console.error('Contact submission error:', error);
-    res.status(500).json({ error: 'Internal server error. Please try again later.', details: error.message });
+    console.error('❌ Contact error:', error.message);
+    res.status(500).json({ error: 'Failed to send message. Please try again.', details: error.message });
   }
 });
 
-// Health check endpoint
+// Health check — also shows if env vars are loaded
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Server is running' });
+  res.status(200).json({
+    status: 'OK',
+    message: 'Server is running',
+    smtp_user: process.env.SMTP_USER ? '✅ Set' : '❌ Missing',
+    smtp_pass: process.env.SMTP_PASS ? '✅ Set' : '❌ Missing',
+  });
 });
 
-// Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
